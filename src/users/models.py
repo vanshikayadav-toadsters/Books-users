@@ -3,6 +3,7 @@ from sqlmodel import SQLModel, Field, Column
 import sqlalchemy.dialects.postgresql as pg
 import uuid
 from datetime import datetime
+from src.auth.utils import generate_password_hash
 
 
 class User(SQLModel, table=True):
@@ -17,18 +18,17 @@ class User(SQLModel, table=True):
             nullable=False
         )
     )
-
+    first_name: str =Field(max_length=25)
+    last_name:  str =Field(max_length=25)
     username: str = Field(nullable=False, unique=True, index=True)
     email: str = Field(nullable=False, unique=True, index=True)
-    password: str = Field(nullable=False)
+    password_hash: str = Field(nullable=False)
 
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Column(pg.TIMESTAMP, default=datetime.utcnow)
+       sa_column=Column(pg.TIMESTAMP, default=datetime.utcnow)
     )
 
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
         sa_column=Column(pg.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     )
 

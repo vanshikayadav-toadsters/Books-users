@@ -5,7 +5,6 @@ from sqlalchemy import pool
 
 from alembic import context
 from src.books.models import Book
-from src.auth.models import UserAccount
 from src.users.models import User
 from sqlmodel import SQLModel
 

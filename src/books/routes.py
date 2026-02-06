@@ -3,6 +3,7 @@ from sqlmodel import Session
 from src.db.database import get_session
 from src.books.schemas import BookCreate, BookUpdate
 from src.books.books_db import create_book, get_books, update_book, delete_book
+from src.auth.dependencies import AccessToken
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
@@ -31,3 +32,4 @@ def delete_book_route(book_id: str, session: Session = Depends(get_session)):
     if not success:
         raise HTTPException(status_code=404, detail="Book not found")
     return {"message": "Book deleted"}
+
