@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from src.users.routes import router as user_router
-from src.books.routes import router as book_router
+from src.books.routes import book_router
 from src.auth.routes import auth_router
 from src.db.database import init_db
 app = FastAPI()

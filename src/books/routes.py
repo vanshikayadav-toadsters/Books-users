@@ -1,35 +1,54 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, status, Depends
+from fastapi.exceptions import HTTPException
+from src.books.schemas import BookUpdate, BookCreate
+from src.books.service import book_service
+from src.books.models import Book
 from sqlmodel import Session
 from src.db.database import get_session
-from src.books.schemas import BookCreate, BookUpdate
-from src.books.books_db import create_book, get_books, update_book, delete_book
-from src.auth.dependencies import AccessToken
-
-router = APIRouter(prefix="/books", tags=["Books"])
+from typing import List
+from src.auth.dependencies import AccessTokenBearer
 
 
-@router.post("/")
-def create_book_route(book: BookCreate, session: Session = Depends(get_session)):
-    return create_book(session, book)
+book_router = APIRouter(prefix="/books", tags=["Books"])
+acccess_token_bearer = AccessTokenBearer()
 
 
-@router.get("/")
-def get_books_route(session: Session = Depends(get_session)):
-    return get_books(session)
+@book_router.post("/", response_model=Book, status_code=status.HTTP_201_CREATED)
+def create_book(
+    book_data: BookCreate,
+    session: Session = Depends(get_session),
+    token_details=Depends(acccess_token_bearer),
+):
+    """Create a new book (Protected)"""
+    return book_service.create_book(session, book_data)
 
 
-@router.put("/{book_id}")
-def update_book_route(book_id: str, book: BookUpdate, session: Session = Depends(get_session)):
-    updated_book = update_book(session, book_id, book)
-    if not updated_book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return updated_book
+@book_router.get("/", response_model=List[Book])
+def get_all_books(
+    session: Session = Depends(get_session),
+    token_details=Depends(acccess_token_bearer),
+):
+    """Get all books (Protected)"""
+    return book_service.get_all_books(session)
 
 
-@router.delete("/{book_id}")
-def delete_book_route(book_id: str, session: Session = Depends(get_session)):
-    success = delete_book(session, book_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return {"message": "Book deleted"}
+@book_router.put("/{book_id}", response_model=Book)
+def update_book(
+    book_id: str,
+    book_data: BookUpdate,
+    session: Session = Depends(get_session),
+    token_details=Depends(acccess_token_bearer),
+):
+    """Update a book (Protected)"""
+    return book_service.update_book(session, book_id, book_data)
 
+
+@book_router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_book(
+    book_id: str,
+    session: Session = Depends(get_session),
+    token_details=Depends(acccess_token_bearer),
+):
+    """Delete a book (Protected)"""
+    book_service.delete_book(session, book_id)
+    return None

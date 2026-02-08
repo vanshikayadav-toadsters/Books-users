@@ -4,11 +4,12 @@ from typing import List
 from src.db.database import get_session
 from src.users.schemas import UserCreate, UserUpdate, UserResponse
 from src.users.users_db import create_user, get_users, update_user, delete_user
+from fastapi import status
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.post("/", response_model=UserResponse)
+@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user_route(user: UserCreate, session: Session = Depends(get_session)):
     return create_user(session, user)
 
