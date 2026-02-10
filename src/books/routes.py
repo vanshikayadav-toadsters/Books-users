@@ -6,21 +6,26 @@ from src.books.models import Book
 from sqlmodel import Session
 from src.db.database import get_session
 from typing import List
-from src.auth.dependencies import AccessTokenBearer
+from src.auth.dependencies import AccessTokenBearer, RoleChecker
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
+
+#book_service=BookService()
 book_router = APIRouter(prefix="/books", tags=["Books"])
 acccess_token_bearer = AccessTokenBearer()
+role_checker = RoleChecker(allowed_roles=["admin", "user"])
 
 
-@book_router.post("/", response_model=Book, status_code=status.HTTP_201_CREATED)
+@book_router.post("/", response_model=Book, status_code=status.HTTP_201_CREATED , dependencies=[Depends(RoleChecker)])
 def create_book(
     book_data: BookCreate,
     session: Session = Depends(get_session),
     token_details=Depends(acccess_token_bearer),
-):
+) -> dict :
+    user_id = token_details["user"]["user_uid"]
     """Create a new book (Protected)"""
-    return book_service.create_book(session, book_data)
+    return book_service.create_book(session, book_data, user_id)
 
 
 @book_router.get("/", response_model=List[Book])

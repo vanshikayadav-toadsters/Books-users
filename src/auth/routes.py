@@ -8,11 +8,14 @@ from datetime import timedelta ,datetime
 from pydantic import BaseModel, Field
 from fastapi.responses import JSONResponse
 from src.db.redis import add_jti_to_blocklist
-from src.auth.dependencies  import AccessTokenBearer, RefreshTokenBearer
+from src.auth.dependencies  import AccessTokenBearer, RefreshTokenBearer, RoleChecker
+from src.users.schemas import UserResponse
+from src.auth.dependencies import get_current_user
 
 
 auth_router = APIRouter()
 user_service = UserService()
+role_checker = RoleChecker(allowed_roles=["admin", "user"])
 
 class UserLoginModel(BaseModel):
     email: str = Field(max_length=40)
@@ -89,3 +92,8 @@ async def revoke_token(token_details:dict=Depends(AccessTokenBearer())):
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail="Invalid token format - missing JTI"
         )
+    
+@auth_router.get("/me", response_model=UserResponse)
+async def get_current_user(
+    user=Depends(get_current_user)):
+    return user

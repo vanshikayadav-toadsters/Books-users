@@ -1,16 +1,25 @@
+from datetime import datetime
 from typing import List, Optional
 from sqlmodel import Session, select
 from fastapi import HTTPException
 from src.books.models import Book
 from src.books.schemas import BookCreate, BookUpdate
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import desc
 
 class BookService:
     """Service class for all book-related operations"""
     
-    def create_book(self, session: Session, book_data: BookCreate) -> Book:
+    def create_book(self, session: Session, book_data: BookCreate, user_uid: str) -> Book:
         """Create a new book"""
+        book_data_dict = book_data.model_dump()
+
         book = Book(**book_data.dict())
+
+        book.published_date = datetime.strptime(
+            book_data_dict["published_date"], "%Y-%m-%d"
+        )
+        book.user_uid = user_uid
         session.add(book)
         session.commit()
         session.refresh(book)
@@ -79,7 +88,17 @@ class BookService:
             Book.price <= max_price
         )
         return session.exec(statement).all()
+    
 
+    async def get_user_books(self, user_uid: str, session: AsyncSession):
+
+        statement = (
+            select(Book).where(Book.user_uid == user_uid).order_by(desc(Book.created_at))
+        )
+
+        result = await session.exec(statement)
+
+        return result.all()
 
 # Create a singleton instance for easy import
 book_service = BookService()
