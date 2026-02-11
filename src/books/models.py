@@ -1,12 +1,19 @@
+from src.db.models import Tag
 from sqlmodel import Relationship, SQLModel, Field, Column
 import sqlalchemy.dialects.postgresql as pg
 import uuid
 from datetime import datetime, date
 from typing import Optional
+from typing import List
+from src.db.models import BookTag
+from src.users.models import User
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.users.models import User
+    from src.users.models import Review
+
 
 
 
@@ -44,5 +51,21 @@ class Book(SQLModel, table=True):
 
     user: Optional["User"] = Relationship(back_populates="books")
 
+    reviews: List["Review"] = Relationship(
+        back_populates="book",
+        sa_relationship_kwargs={"lazy":"selectin"}
+    )
+
+    tags: List["Tag"] = Relationship(
+        link_model=BookTag,
+        back_populates="books",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    
+    )
+
     def __repr__(self) -> str:
         return f"<Book {self.title}>"
+    
+
+
+

@@ -30,13 +30,13 @@ class BookService:
         statement = select(Book)
         return session.exec(statement).all()
     
-    def get_book_by_id(self, session: Session, book_id: str) -> Optional[Book]:
+    def get_book_by_id(self, session: Session, book_uid: str) -> Optional[Book]:
         """Get a single book by ID"""
-        return session.get(Book, book_id)
+        return session.get(Book, book_uid)
     
-    def update_book(self, session: Session, book_id: str, book_data: BookUpdate) -> Book:
+    def update_book(self, session: Session, book_uid: str, book_data: BookUpdate) -> Book:
         """Update an existing book"""
-        book = session.get(Book, book_id)
+        book = session.get(Book, book_uid)
         if not book:
             raise HTTPException(status_code=404, detail="Book not found")
         

@@ -7,6 +7,7 @@ from src.users.users_db import create_user, get_users, update_user, delete_user
 from fastapi import status
 
 router = APIRouter(prefix="/users", tags=["Users"])
+review_router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)

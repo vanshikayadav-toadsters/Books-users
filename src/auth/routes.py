@@ -11,6 +11,12 @@ from src.db.redis import add_jti_to_blocklist
 from src.auth.dependencies  import AccessTokenBearer, RefreshTokenBearer, RoleChecker
 from src.users.schemas import UserResponse
 from src.auth.dependencies import get_current_user
+from src.mail import mail, create_message
+from src.celery_tasks import send_email
+from src.auth.schemas import EmailModel
+
+
+
 
 
 auth_router = APIRouter()
@@ -97,3 +103,17 @@ async def revoke_token(token_details:dict=Depends(AccessTokenBearer())):
 async def get_current_user(
     user=Depends(get_current_user)):
     return user
+
+
+
+@auth_router.post("/send_mail")
+async def send_mail(emails: EmailModel):
+    emails = emails.addresses
+
+    html = "<h1>Welcome to the app</h1>"
+    subject = "Welcome to our app"
+
+    message = create_message(recipients=emails, subject=subject,body=html)
+    mail.send_message(message)
+
+    return {"message":"Email sent successfully"}

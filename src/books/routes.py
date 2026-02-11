@@ -15,6 +15,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 book_router = APIRouter(prefix="/books", tags=["Books"])
 acccess_token_bearer = AccessTokenBearer()
 role_checker = RoleChecker(allowed_roles=["admin", "user"])
+review_router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
 @book_router.post("/", response_model=Book, status_code=status.HTTP_201_CREATED , dependencies=[Depends(RoleChecker)])

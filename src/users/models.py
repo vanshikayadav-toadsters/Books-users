@@ -4,9 +4,15 @@ import sqlalchemy.dialects.postgresql as pg
 import uuid
 from datetime import datetime
 from src.auth.utils import generate_password_hash
-from typing import List
+from typing import TYPE_CHECKING, List
 from sqlmodel import Relationship
-from src.books.models import Book
+from typing import Optional
+if TYPE_CHECKING:
+    from src.books.models import Book
+    from src.db.models import Review
+
+
+
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -44,6 +50,14 @@ class User(SQLModel, table=True):
         back_populates = "user",
         sa_relationship_kwargs={"lazy":"selectin"}
     )
+    reviews: List["Review"] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"
+    
+
+
+
+
